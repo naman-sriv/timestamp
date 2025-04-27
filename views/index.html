@@ -1,21 +1,39 @@
 <!DOCTYPE html>
-
 <html>
 <head>
-    <title>Timestamp Microservice | freeCodeCamp.org</title>
-    <link rel="shortcut icon" href="https://cdn.freecodecamp.org/universal/favicons/favicon-32x32.png" type="image/x-icon"/>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-    <link href="style.css" rel="stylesheet" type="text/css">
+    <title>Timestamp Microservice</title>
+    <link
+            rel="shortcut icon"
+            href="https://cdn.freecodecamp.org/universal/favicons/favicon-32x32.png"
+            type="image/x-icon"
+    />
+    <link
+            href="https://fonts.googleapis.com/css?family=Roboto"
+            rel="stylesheet"
+            type="text/css"
+    />
+    <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
 <h1>Timestamp Microservice</h1>
 <hr />
 <div class="container">
+    <h2>Enter a Date or Unix Timestamp:</h2>
+    <input type="text" id="dateInput" placeholder="YYYY-MM-DD or Unix Timestamp" />
+    <button onclick="fetchTimestamp()">Get Timestamp</button>
+
+    <div id="output" class="output-area">
+        <h2>Output:</h2>
+        <p id="unixOutput">Unix Timestamp:</p>
+        <p id="utcOutput">UTC Date:</p>
+    </div>
+
     <h2>Example Usage:</h2>
     <ul>
-        <li><a href="api/2015-12-25">[project url]/api/2015-12-25</a></li>
-        <li><a href="api/1451001600000">[project url]/api/1451001600000</a></li>
+        <li><a href="/api/2015-12-25">/api/2015-12-25</a></li>
+        <li><a href="/api/1451001600000">/api/1451001600000</a></li>
+        <li><a href="/api">/api (for current timestamp)</a></li>
     </ul>
 
     <h2>Example Output:</h2>
@@ -28,5 +46,48 @@
         By <a href="https://www.freecodecamp.org/">freeCodeCamp.org</a>
     </p>
 </div>
+
+<script>
+    function fetchTimestamp() {
+        const dateInputValue = document.getElementById('dateInput').value;
+        let apiUrl = '/api';
+        if (dateInputValue) {
+            apiUrl = `/api/${dateInputValue}`;
+        }
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('unixOutput').textContent = `Error: ${data.error}`;
+                    document.getElementById('utcOutput').textContent = '';
+                } else {
+                    document.getElementById('unixOutput').textContent = `Unix Timestamp: ${data.unix}`;
+                    document.getElementById('utcOutput').textContent = `UTC Date: ${data.utc}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('unixOutput').textContent = `Error: Could not connect to the API`;
+                document.getElementById('utcOutput').textContent = '';
+                console.error('Error fetching timestamp:', error);
+            });
+    }
+
+    // Display current timestamp on load
+    fetch('/api')
+        .then(response => response.json())
+        .then(data => {
+            const currentOutputDiv = document.getElementById('output');
+            const currentUnix = document.createElement('p');
+            currentUnix.textContent = `Current Unix Timestamp: ${data.unix}`;
+            const currentUtc = document.createElement('p');
+            currentUtc.textContent = `Current UTC Date: ${data.utc}`;
+            currentOutputDiv.prepend(currentUtc);
+            currentOutputDiv.prepend(currentUnix);
+        })
+        .catch(error => {
+            console.error('Error fetching current timestamp on load:', error);
+        });
+</script>
 </body>
 </html>
